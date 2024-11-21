@@ -72,6 +72,9 @@ for mascota in consulta:
 print()  # Espacio en blanco para separar
 
 # Hacer una consulta con JOIN para obtener las mascotas con tipo_animal 'gato' y sus dueños
+##
+# !!!!!!! Más rápido, cuando haya varias consultas relacionadas con claves ajenas, hacemos un JOIN
+#
 print("Mascotas de tipo 'gato' con JOIN:")
 consulta = (Mascota
             .select(Mascota, Persona)  # Seleccionar tanto la mascota como la persona
@@ -92,3 +95,111 @@ print()  # Espacio en blanco para separar
 print("Mascotas de Ana (usando referencia ForeignKey):")
 for mascota in Mascota.select().where(Mascota.propietario == ana):
     print(mascota.nombre)  # Imprime los nombres de las mascotas de Ana
+
+
+#
+# CLASIFICACION
+#
+# Consultar y mostrar todas las mascotas ordenadas alfabéticamente por nombre
+print("Mascotas ordenadas por nombre:")
+for mascota in Mascota.select().order_by(Mascota.nombre):
+    print(f"{mascota.nombre} - Dueño: {mascota.propietario.nombre}")
+print()
+
+# Consultar y mostrar todas las personas ordenadas de la más joven a la más vieja
+print("Personas ordenadas por fecha de nacimiento (de joven a vieja):")
+for persona in Persona.select().order_by(Persona.fecha_nacimiento.desc()):
+    print(f"{persona.nombre} - Fecha de nacimiento: {persona.fecha_nacimiento}")
+# Muestra las personas más jovenes primero ya que por ejemplo 2004 es mayor a 1997
+
+
+#########################################
+# Combinación de expresiones de filtro
+#
+# Filtrar personas nacidas antes de 1940 o después de 1959
+d1940 = date(1940, 1, 1)
+d1960 = date(1960, 1, 1)
+query = (Persona
+         .select()
+         .where((Persona.fecha_nacimiento < d1940) | (Persona.fecha_nacimiento > d1960)))
+
+print("Personas nacidas antes de 1940 o después de 1959:")
+for persona in query:
+    print(f"{persona.nombre} - Fecha de nacimiento: {persona.fecha_nacimiento}")
+print()
+
+# Filtrar personas nacidas entre 1940 y 1960 (ambos años incluidos)
+query = (Persona
+         .select()
+         .where(Persona.fecha_nacimiento.between(d1940, d1960)))
+
+print("Personas nacidas entre 1940 y 1960:")
+for persona in query:
+    print(f"{persona.nombre} - Fecha de nacimiento: {persona.fecha_nacimiento}")
+
+##########################
+# Agregados y precarga
+#
+# Enumerar todas las personas y cuántas mascotas tienen
+print("Personas y número de mascotas:")
+for persona in Persona.select():
+    print(persona.nombre, persona.mascotas.count(), 'mascotas')
+
+# Optimizar la consulta utilizando JOIN y agregados
+print("\nPersonas y número de mascotas (optimizado):")
+from peewee import fn
+
+query = (Persona
+         .select(Persona, fn.COUNT(Mascota.id).alias('cantidad_mascotas'))
+         .join(Mascota, JOIN.LEFT_OUTER)  # Incluir personas sin mascotas
+         .group_by(Persona)
+         .order_by(Persona.nombre))
+
+for persona in query:
+    print(persona.nombre, persona.cantidad_mascotas, 'mascotas')
+
+# Enumerar todas las personas y los nombres de sus mascotas
+print("\nPersonas y nombres de sus mascotas:")
+query = (Persona
+         .select(Persona, Mascota)
+         .join(Mascota, JOIN.LEFT_OUTER)
+         .order_by(Persona.nombre, Mascota.nombre))
+for persona in query:
+    if hasattr(persona, 'mascota'):
+        print(persona.nombre, persona.mascota.nombre)
+    else:
+        print(persona.nombre, 'sin mascotas')
+
+# Optimizar la consulta utilizando prefetch
+print("\nPersonas y nombres de sus mascotas (optimizado con prefetch):")
+query = Persona.select().order_by(Persona.nombre).prefetch(Mascota)
+for persona in query:
+    print(persona.nombre)
+    for mascota in persona.mascotas:
+        print('  *', mascota.nombre)
+
+
+#############################
+# Funciones SQL
+#
+print("\nPersonas cuyos nombres comienzan con G o P (mayúscula o minúscula):")
+from peewee import fn
+
+# Crear dos expresiones: una para nombres que empiezan con 'g' y otra para 'p'
+expression = (fn.Lower(fn.Substr(Persona.nombre, 1, 1)) == 'g') | \
+             (fn.Lower(fn.Substr(Persona.nombre, 1, 1)) == 'p')
+
+# Consultar las personas que cumplen con alguna de las dos condiciones
+for persona in Persona.select().where(expression):
+    print(persona.nombre)
+
+
+#######################
+# Database
+#
+db.close()
+
+
+##########################
+# Usamos PWIZ
+#

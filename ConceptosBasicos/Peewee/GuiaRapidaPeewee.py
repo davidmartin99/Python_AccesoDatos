@@ -52,11 +52,13 @@ herb_mittens.delete_instance()
 herb_fido.owner = uncle_bob
 herb_fido.save()
 
+
 # Obtener a la persona 'Grandma L.' mediante una consulta
 grandma = Person.select().where(Person.name == 'Grandma L.').get()
 
 # Otra forma de obtener a 'Grandma L.'
 grandma = Person.get(Person.name == 'Grandma L.')
+
 
 # Imprimir los nombres de todas las personas almacenadas en la base de datos
 for person in Person.select():
