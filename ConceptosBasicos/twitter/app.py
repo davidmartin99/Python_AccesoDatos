@@ -41,6 +41,10 @@ class User(BaseModel):
 
     # it often makes sense to put convenience methods on model instances, for
     # example, "give me all the users this user is following":
+##################
+## IMPORTANTE
+###################
+
     def following(self):
         # query other users through the "relationship" table
         return (User
@@ -73,6 +77,9 @@ class User(BaseModel):
 # model a "many-to-many" relationship between users.  by querying and joining
 # on different columns we can expose who a user is "related to" and who is
 # "related to" a given user
+########################################
+# IMPORTANTE EXAMEN
+########################################
 class Relationship(BaseModel):
     from_user = ForeignKeyField(User, backref='relationships')
     to_user = ForeignKeyField(User, backref='related_to')
@@ -97,6 +104,79 @@ class Message(BaseModel):
 def create_tables():
     with database:
         database.create_tables([User, Relationship, Message])
+
+
+######################################################
+### INSERTO DATOS EN LAS TABLAS
+########################################
+def insertar_datos():
+    try:
+        ############# Insertar 3 usuarios
+        alice = User.create(
+            username="alice23",
+            password="password123",
+            email="alice@example.com",
+            join_date=datetime.datetime.now()
+        )
+        poppy = User.create(
+            username="poppy3004",
+            password="securepass",
+            email="maria@example.com",
+            join_date=datetime.datetime.now()
+        )
+        charlie = User.create(
+            username="charlie1",
+            password="mypassword",
+            email="charlie@example.com",
+            join_date=datetime.datetime.now()
+        )
+
+        ############# Insertar mensajes
+        Message.create(
+            user=alice,
+            content="Hello, world!",
+            pub_date=datetime.datetime.now()
+        )
+        Message.create(
+            user=alice,
+            content="Learning Python is fun!",
+            pub_date=datetime.datetime.now()
+        )
+        Message.create(
+            user=poppy,
+            content="Good morning everyone!",
+            pub_date=datetime.datetime.now()
+        )
+        Message.create(
+            user=charlie,
+            content="Just started a new project.",
+            pub_date=datetime.datetime.now()
+        )
+
+        ############# Insertar relaciones
+        Relationship.create(
+            from_user=alice,
+            to_user=poppy
+        )
+        Relationship.create(
+            from_user=alice,
+            to_user=charlie
+        )
+        Relationship.create(
+            from_user=poppy,
+            to_user=alice
+        )
+        Relationship.create(
+            from_user=charlie,
+            to_user=poppy
+        )
+
+        print("Datos insertados correctamente.")
+
+    except Exception as e:
+        print(f"Error al insertar datos: {e}")
+
+
 
 # flask provides a "session" object, which allows us to store information across
 # requests (stored by default in a secure cookie).  this function allows us to

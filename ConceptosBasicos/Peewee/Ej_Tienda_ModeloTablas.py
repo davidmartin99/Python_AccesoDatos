@@ -123,3 +123,22 @@ if __name__ == "__main__":
     print("Se crearin las tabli perfecti")
     insertar_datos()
     print("Se insertaron correctamente los datos")
+
+
+
+# 1. Obtener los datos de los clientes y sus compras
+clientes_con_compras = (
+    Clientes
+    .select(
+        Clientes.codigo_cli,
+        Clientes.nombre,
+        Clientes.localidad,
+        Compras.numcompra,
+        Compras.fechacompra
+    )
+    .join(Compras, JOIN.LEFT_OUTER, on=(Clientes.codigo_cli == Compras.codigo_cli))
+)
+for cliente in clientes_con_compras:
+    print(f"Código Cliente: {cliente.codigo_cli}, Nombre: {cliente.nombre}, Localidad: {cliente.localidad}")
+    for compra in cliente.compras:
+        print(f"  Número Compra: {compra.numcompra}, Fecha Compra: {compra.fechacompra}")
