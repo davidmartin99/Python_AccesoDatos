@@ -2,8 +2,8 @@ from peewee import MySQLDatabase
 
 # Cambia estas credenciales según tu configuración
 db = MySQLDatabase(
-    'tienda',  # Nombre de la base de datos
-    user='root',  # Usuario
+    'tienda2',  # Nombre de la base de datos
+    user='david',  # Usuario
     password='1234',  # Contraseña
     host='localhost',  # Servidor
     port=3306  # Puerto de MySQL
