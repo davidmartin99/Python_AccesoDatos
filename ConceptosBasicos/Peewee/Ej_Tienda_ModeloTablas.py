@@ -6,13 +6,13 @@ from peewee import (
     CharField,
     FloatField,
     DateField,
-    ForeignKeyField
+    ForeignKeyField, JOIN
 )
 from datetime import date
 from peewee import IntegrityError
 # Conexión a la base de datos MySQL
 db = MySQLDatabase(
-    'tienda',
+    'tienda2',
     user='root',
     password='1234',
     host='localhost',
@@ -128,15 +128,15 @@ if __name__ == "__main__":
 
 # 1. Obtener los datos de los clientes y sus compras
 clientes_con_compras = (
-    Clientes
+    Cliente
     .select(
-        Clientes.codigo_cli,
-        Clientes.nombre,
-        Clientes.localidad,
-        Compras.numcompra,
-        Compras.fechacompra
+        Cliente.codigo_cli,
+        Cliente.nombre,
+        Cliente.localidad,
+        Compra.numcompra,
+        Compra.fechacompra
     )
-    .join(Compras, JOIN.LEFT_OUTER, on=(Clientes.codigo_cli == Compras.codigo_cli))
+    .join(Compra, JOIN.LEFT_OUTER, on=(Cliente.codigo_cli == Compra.codigo_cli))
 )
 for cliente in clientes_con_compras:
     print(f"Código Cliente: {cliente.codigo_cli}, Nombre: {cliente.nombre}, Localidad: {cliente.localidad}")
