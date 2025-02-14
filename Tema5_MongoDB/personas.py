@@ -75,3 +75,18 @@ for doc in col.find().sort("edad", 1):
 ################# Eliminar todos los documentos de la colección
 # print("\nEliminando todos los documentos...")
 # col.delete_many({})  # Eliminar todos los documentos de la colección
+
+
+################# Modificaciones UpDate
+# Modificar un documento con update_one
+print("\nModificando la edad de Ana a 26...")
+col.update_one({"nombre": "Ana"}, {"$set": {"edad": 26}})
+
+# Modificar múltiples documentos con update_many
+print("\nCambiando la ciudad de todas las personas cuyo nombre empieza con 'A'...")
+col.update_many({"nombre": {"$regex": "^A"}}, {"$set": {"ciudad": "Madrid"}})
+
+# Mostrar los documentos después de la actualización
+print("\nPersonas después de las modificaciones:")
+for doc in col.find().sort("edad", 1):
+    print(doc)
